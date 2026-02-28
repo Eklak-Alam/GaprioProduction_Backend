@@ -10,6 +10,12 @@ const TokenService = require('../services/token.service');
 const { WebClient } = require('@slack/web-api');
 const bcrypt = require('bcryptjs');
 
+// 🔥 GLOBAL FRONTEND URL CHECK
+// This dynamically switches between your live website and localhost
+const FRONTEND_URL = process.env.NODE_ENV === 'production' 
+    ? 'https://www.gaprio.in' 
+    : 'http://localhost:3000';
+
 // ==========================================
 // 🔵 HELPER: Identity Resolution Logic
 // ==========================================
@@ -46,7 +52,7 @@ async function resolveUser(providerProfile, providerName, stateUserId) {
 }
 
 // ==========================================
-// 🔵 HELPER: Finalize Auth & Redirect (The Missing Function)
+// 🔵 HELPER: Finalize Auth & Redirect
 // ==========================================
 async function finalizeAuth(res, userId, provider, providerUserId, accessToken, refreshToken, expiresAt, metadata = {}) {
     // Upsert connection details
@@ -66,7 +72,7 @@ async function finalizeAuth(res, userId, provider, providerUserId, accessToken, 
     const jwtRefresh = await TokenService.generateRefreshToken(user.id);
     
     // Redirect to frontend with tokens
-    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/callback?accessToken=${jwtAccess}&refreshToken=${jwtRefresh}`);
+    res.redirect(`${FRONTEND_URL}/callback?accessToken=${jwtAccess}&refreshToken=${jwtRefresh}`);
 }
 
 // ==========================================
@@ -97,7 +103,7 @@ exports.googleCallback = async (req, res) => {
 
     } catch (error) {
         console.error("Google Auth Error:", error);
-        res.redirect('http://localhost:3000/login?error=GoogleFailed');
+        res.redirect(`${FRONTEND_URL}/login?error=GoogleFailed`);
     }
 };
 
@@ -128,7 +134,7 @@ exports.slackCallback = async (req, res) => {
 
     } catch (error) {
         console.error("Slack Auth Error:", error);
-        res.redirect('http://localhost:3000/login?error=SlackFailed');
+        res.redirect(`${FRONTEND_URL}/login?error=SlackFailed`);
     }
 };
 
@@ -168,7 +174,7 @@ exports.asanaCallback = async (req, res) => {
 
     } catch (error) {
         console.error("Asana Auth Error:", error);
-        res.redirect('http://localhost:3000/login?error=AsanaFailed');
+        res.redirect(`${FRONTEND_URL}/login?error=AsanaFailed`);
     }
 };
 
@@ -198,7 +204,7 @@ exports.miroCallback = async (req, res) => {
 
     } catch (error) {
         console.error("Miro Auth Error:", error);
-        res.redirect('http://localhost:3000/login?error=MiroFailed');
+        res.redirect(`${FRONTEND_URL}/login?error=MiroFailed`);
     }
 };
 
@@ -236,7 +242,7 @@ exports.jiraCallback = async (req, res) => {
 
     } catch (error) {
         console.error("Jira Auth Error:", error);
-        res.redirect('http://localhost:3000/login?error=JiraFailed');
+        res.redirect(`${FRONTEND_URL}/login?error=JiraFailed`);
     }
 };
 
@@ -286,6 +292,6 @@ exports.zohoCallback = async (req, res) => {
         
     } catch (error) {
         console.error("Zoho Auth Error:", error);
-        res.redirect('http://localhost:3000/login?error=ZohoFailed');
+        res.redirect(`${FRONTEND_URL}/login?error=ZohoFailed`);
     }
 };

@@ -103,7 +103,20 @@ class MonitoringService {
             };
         } catch (error) {
             console.error('❌ [Monitor] Failed to execute action:', error.message);
-            throw new Error(error.response?.data?.detail || error.message);
+            // Still mark as executed (attempted) so it doesn't stay pending forever
+            try {
+                await SuggestedActionModel.updateStatus(actionId, 'executed', {
+                    success: false,
+                    error: error.response?.data?.detail || error.message
+                });
+            } catch (updateErr) {
+                console.error('❌ [Monitor] Also failed to update status:', updateErr.message);
+            }
+            // Return error info instead of throwing (so the HTTP response is still 200)
+            return {
+                success: false,
+                error: error.response?.data?.detail || error.message
+            };
         }
     }
 
